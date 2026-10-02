@@ -104,10 +104,10 @@ I:S 預設**不含標題**，也可勾選標題。先將 CSV 匯入試算表，�
 
 1. 推送到 GitHub 的 `main`。
 2. Repository Settings → Pages → Source 選 **GitHub Actions**。
-3. Actions → **Deploy GitHub Pages** → **Run workflow**，選 `main`。
-4. 使用部署工作產生的 Pages 網址；更新後再執行工作即可。
+3. 推送 `main` 會自動部署；也可在 Actions → **Deploy GitHub Pages** → **Run workflow** 選 `main` 手動重跑。
+4. 使用部署工作產生的 Pages 網址；往後推送 `main` 即會更新。
 
-部署工作是手動觸發，不會因第一次 push 就自動公開網站。另一個 Checks 工作會在 push／PR 跑 lint、單元測試、建置與 Playwright。
+已啟用 `main` 推送自動部署。首次須在 Repository Settings → Pages 設定 GitHub Actions，否則部署工作無法建立網站。另一個 Checks 工作會在 push／PR 跑 lint、單元測試、建置與 Playwright。
 
 ### Vercel / Cloudflare Pages
 
