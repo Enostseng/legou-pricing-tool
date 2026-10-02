@@ -19,14 +19,14 @@ export function PlatformFees({
       <div className="section-heading">
         <span className="step">02</span>
         <div>
-          <h2 id="fees-title">樂購平台收費（以下皆由樂購收取）</h2>
-          <p>此區費用由樂購收取，並非我們額外加收。</p>
+          <h2 id="fees-title">蝦皮直營平台收費（以下皆由蝦皮直營收取）</h2>
+          <p>此區費用由蝦皮直營收取，並非我們額外加收。</p>
         </div>
       </div>
       <div className="notice">
         {feeTable.status === "placeholder"
           ? "正式費率待提供。可先手動填入費用試算，結果會標註為手動費率。"
-          : "依材積與樂購採購價查表。優惠僅限指定運送渠道：採購價 ≤ 25 元按 50%，26–50 元按 75% 計費。"}
+          : "依材積與蝦皮直營採購價查表。優惠僅限指定運送渠道：採購價 ≤ 25 元按 50%，26–50 元按 75% 計費。"}
       </div>
       <label className="field">
         <span>費率來源</span>
@@ -56,7 +56,7 @@ export function PlatformFees({
             </select>
           </label>
           <p className="help">
-            查價金額：樂購採購價 $ {money(result?.purchasePrice ?? null)} ·
+            查價金額：蝦皮直營採購價 $ {money(result?.purchasePrice ?? null)} ·
             費率版本 {feeTable.version}
           </p>
           {fees && (

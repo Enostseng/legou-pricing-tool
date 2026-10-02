@@ -37,11 +37,11 @@ export function CalculationSummary({
       )}
       <div className="profit-grid">
         <div>
-          <span>強哥淨利</span>
+          <span>廠商淨利</span>
           <strong>$ {money(result?.profit ?? null)}</strong>
         </div>
         <div>
-          <span>強哥淨利率</span>
+          <span>廠商淨利率</span>
           <strong>
             {result?.profitMargin == null ? "—" : percent(result.profitMargin)}
           </strong>
@@ -49,11 +49,11 @@ export function CalculationSummary({
       </div>
       <dl className="summary-details">
         <div>
-          <dt>扣除樂購平台費用後撥款金額</dt>
+          <dt>扣除蝦皮直營平台費用後撥款金額</dt>
           <dd>$ {money(result?.payout ?? null)}</dd>
         </div>
         <div>
-          <dt>樂購採購價</dt>
+          <dt>蝦皮直營採購價</dt>
           <dd>$ {money(result?.purchasePrice ?? null)}</dd>
         </div>
         <div>
@@ -69,13 +69,13 @@ export function CalculationSummary({
           <dd>$ {money(result?.businessTax ?? null)}</dd>
         </div>
         <div>
-          <dt>樂購毛利率</dt>
+          <dt>蝦皮直營毛利率</dt>
           <dd>{result ? percent(result.retailMargin) : "—"}</dd>
         </div>
       </dl>
       <p className="help">
         金額單位為新台幣。顯示至小數點後 2
-        位，判定使用未四捨五入的數值。樂購毛利率＝（市售價 − 樂購採購價）÷
+        位，判定使用未四捨五入的數值。蝦皮直營毛利率＝（市售價 − 蝦皮直營採購價）÷
         市售價。
       </p>
     </section>

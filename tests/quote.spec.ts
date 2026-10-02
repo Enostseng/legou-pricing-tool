@@ -133,7 +133,7 @@ test("automatic fees use purchase price, preserve discount precision, and restor
   }))
     await page.getByLabel(label, { exact: true }).fill(value);
   const platform = page.locator(".platform-card");
-  await expect(platform).toContainText("查價金額：樂購採購價 $ 26.00");
+  await expect(platform).toContainText("查價金額：蝦皮直營採購價 $ 26.00");
   await expect(platform).toContainText("$ 5.80");
   await expect(platform).toContainText("$ 3.70");
   await page.getByLabel("運送渠道").selectOption("discounted");
@@ -157,4 +157,51 @@ test("automatic fees use purchase price, preserve discount precision, and restor
   await expect(platform).toContainText("$ 60.10");
   await page.getByLabel("高", { exact: true }).fill("20.0001");
   await expect(platform).toContainText("$ 94.10");
+});
+
+test("public tool calculates without a product name and uses the new labels", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page).toHaveTitle("蝦皮直營提品試算工具");
+  for (const [label, value] of Object.entries({
+    商品市售價: "1000",
+    長: "10",
+    寬: "20",
+    高: "30",
+    廠商實際報價: "600",
+  }))
+    await page.getByLabel(label, { exact: true }).fill(value);
+  await expect(page.getByLabel("商品名稱")).toHaveValue("");
+  await expect(page.getByTestId("max-vendor-cost")).toHaveText("$ 627.57");
+  await expect(page.locator(".quote-status")).toHaveText("可提交");
+  await expect(page.getByText("廠商淨利", { exact: true })).toBeVisible();
+  await expect(page.getByText("廠商淨利率", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "蝦皮直營平台收費（以下皆由蝦皮直營收取）",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "記錄商品並清空" }),
+  ).toBeDisabled();
+  await expect(page.locator("body")).not.toContainText("樂購");
+  await expect(page.locator("body")).not.toContainText("強哥");
+  await page.getByLabel("商品名稱").fill("新名稱驗證");
+  await page.getByRole("button", { name: "記錄商品並清空" }).click();
+  await page.getByRole("button", { name: /商品清單/ }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "匯出完整 CSV" }).click();
+  const stream = await (await download).createReadStream();
+  const chunks = [];
+  for await (const chunk of stream!) chunks.push(chunk);
+  const csv = Buffer.concat(chunks).toString("utf8");
+  expect(csv).toContain('"廠商淨利","廠商淨利率"');
+  expect(csv).not.toContain("強哥");
+  await page.setViewportSize({ width: 320, height: 700 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

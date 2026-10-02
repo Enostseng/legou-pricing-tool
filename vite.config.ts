@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
       manifest: {
-        name: "樂購商品報價工具",
-        short_name: "樂購報價",
+        name: "蝦皮直營提品試算工具",
+        short_name: "蝦皮直營試算",
         description: "商品成本、平台費用與淨利一次算清楚",
         lang: "zh-TW",
         theme_color: "#204e44",

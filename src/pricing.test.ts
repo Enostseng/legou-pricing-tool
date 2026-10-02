@@ -82,7 +82,6 @@ describe("pricing", () => {
     { retailPrice: NaN },
     { length: 0 },
     { vendorPrice: -1 },
-    { name: "" },
   ])("rejects invalid input %o", (override) => {
     expect(() => calculateQuote({ ...input, ...override }, fees)).toThrow();
   });
@@ -91,4 +90,13 @@ describe("pricing", () => {
       calculateQuote({ ...input, vendorPrice: 900 }, fees).businessTax,
     ).toBe(-2.5);
   });
+});
+
+it("calculates identical amounts without a product name", () => {
+  expect(calculateQuote({ ...input, name: "" }, fees)).toEqual(
+    calculateQuote(input, fees),
+  );
+  expect(calculateQuote({ ...input, name: "   " }, fees)).toEqual(
+    calculateQuote(input, fees),
+  );
 });

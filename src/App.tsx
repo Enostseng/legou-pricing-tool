@@ -5,7 +5,12 @@ import type { FormState } from "./form";
 import { PlatformFees } from "./components/PlatformFees";
 import { CalculationSummary } from "./components/CalculationSummary";
 import { ProductHistory } from "./components/ProductHistory";
-import { calculateQuote, validInput, RATES } from "./pricing";
+import {
+  calculateQuote,
+  validInput,
+  validPricingInput,
+  RATES,
+} from "./pricing";
 import type { QuoteInput } from "./pricing";
 import { resolveFees } from "./feeTable";
 import type { Fees } from "./feeTable";
@@ -62,7 +67,7 @@ export default function App() {
           Math.floor(input.retailPrice * RATES.purchase),
           form.shippingChannel,
         );
-  const result = valid ? calculateQuote(input, fees) : null;
+  const result = validPricingInput(input) ? calculateQuote(input, fees) : null;
   const setField = (key: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
     setNotice("");
@@ -82,7 +87,7 @@ export default function App() {
     }
   }
   function save() {
-    if (!result || storageError) return;
+    if (!result || !valid || storageError) return;
     if (form.feeMode === "manual" && !manualValid) {
       setError(
         "請完整填入寄倉與物流費用（可為 0），或切回公司費率表儲存待補費率的紀錄。",
@@ -206,10 +211,10 @@ export default function App() {
           }}
         >
           <span className="brand-mark" aria-hidden="true">
-            購
+            試
           </span>
           <span>
-            樂購<span className="brand-sub">商品報價工具</span>
+            蝦皮直營<span className="brand-sub">提品試算工具</span>
           </span>
         </a>
         <span className="local-pill">
@@ -242,7 +247,7 @@ export default function App() {
                 try {
                   downloadFile(
                     localStorage.getItem(STORAGE_KEY) ?? "",
-                    "樂購原始紀錄備份.json",
+                    "蝦皮直營原始紀錄備份.json",
                     "application/json",
                   );
                 } catch {
@@ -256,7 +261,7 @@ export default function App() {
               onClick={() => {
                 if (
                   window.confirm(
-                    "已備份原始紀錄？重設會清除這個瀏覽器所有樂購商品紀錄。",
+                    "已備份原始紀錄？重設會清除這個瀏覽器所有蝦皮直營商品紀錄。",
                   ) &&
                   persist([])
                 )
@@ -280,7 +285,7 @@ export default function App() {
         {page === "quote" ? (
           <>
             <div className="intro">
-              <span className="eyebrow">LE GOU · PRICING WORKSPACE</span>
+              <span className="eyebrow">SHOPEE · PRODUCT PRICING</span>
               <h1>
                 好商品，<span>好報價。</span>
               </h1>
@@ -324,6 +329,11 @@ export default function App() {
                   {editing ? "更新紀錄並清空" : "記錄商品並清空"}
                   <span aria-hidden="true">↗</span>
                 </button>
+                {result && !input.name.trim() && (
+                  <p className="save-hint">
+                    試算不需品名；記錄商品前請填寫商品名稱。
+                  </p>
+                )}
                 <p className="save-hint">
                   商品資料只存在目前瀏覽器，不會上傳。
                   <br />
@@ -347,7 +357,7 @@ export default function App() {
           />
         )}
         <footer>
-          <span>樂購商品報價工具</span>
+          <span>蝦皮直營提品試算工具</span>
           <span>簡單報價 · 清楚合作</span>
         </footer>
       </main>

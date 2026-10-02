@@ -21,7 +21,7 @@ export function ProductHistory({ products, onEdit, onDelete, onClear }: Props) {
   function exportRecords(mode: "sheet" | "full") {
     downloadFile(
       exportCsv(filtered, mode, mode === "full" || headers),
-      `樂購商品-${mode === "sheet" ? "I-S" : "完整"}-${new Date().toISOString().slice(0, 10)}.csv`,
+      `蝦皮直營商品-${mode === "sheet" ? "I-S" : "完整"}-${new Date().toISOString().slice(0, 10)}.csv`,
     );
   }
   return (
@@ -112,11 +112,11 @@ export function ProductHistory({ products, onEdit, onDelete, onClear }: Props) {
                   <strong>$ {money(p.result.maxVendorCost)}</strong>
                 </div>
                 <div>
-                  <span>強哥淨利</span>
+                  <span>廠商淨利</span>
                   <strong>$ {money(p.result.profit)}</strong>
                 </div>
                 <div>
-                  <span>強哥淨利率 / 目標</span>
+                  <span>廠商淨利率 / 目標</span>
                   <strong>
                     {p.result.profitMargin === null
                       ? "—"

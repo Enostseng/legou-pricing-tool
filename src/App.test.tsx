@@ -53,3 +53,20 @@ it("does not silently record incomplete manual fees", () => {
   expect(screen.getByRole("alert")).toHaveTextContent("請完整填入");
   expect(loadProducts()).toHaveLength(0);
 });
+
+it("shows calculated prices with no name but requires a name to save", () => {
+  render(<App />);
+  fill();
+  fireEvent.change(screen.getByLabelText("商品名稱"), {
+    target: { value: "" },
+  });
+  expect(screen.getByTestId("max-vendor-cost")).toHaveTextContent("$ 550.88");
+  expect(screen.getByText("廠商淨利")).toBeInTheDocument();
+  expect(screen.getByText("廠商淨利率")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "記錄商品並清空" })).toBeDisabled();
+  expect(loadProducts()).toHaveLength(0);
+  fireEvent.change(screen.getByLabelText("商品名稱"), {
+    target: { value: "商品" },
+  });
+  expect(screen.getByRole("button", { name: "記錄商品並清空" })).toBeEnabled();
+});

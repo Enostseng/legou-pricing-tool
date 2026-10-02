@@ -16,10 +16,8 @@ export interface QuoteInput {
   vendorPrice: number;
   targetMargin: number;
 }
-export function validInput(q: QuoteInput): boolean {
+export function validPricingInput(q: QuoteInput): boolean {
   return (
-    q.name.trim().length > 0 &&
-    q.name.length <= 200 &&
     [q.retailPrice, q.length, q.width, q.height].every(
       (n) => Number.isFinite(n) && n > 0 && n <= 1e9,
     ) &&
@@ -31,8 +29,17 @@ export function validInput(q: QuoteInput): boolean {
     q.targetMargin < 1
   );
 }
+/** A name is required only when recording a product, not when calculating. */
+export function validInput(q: QuoteInput): boolean {
+  return (
+    typeof q.name === "string" &&
+    q.name.trim().length > 0 &&
+    q.name.length <= 200 &&
+    validPricingInput(q)
+  );
+}
 export function calculateQuote(q: QuoteInput, fees: Fees | null) {
-  if (!validInput(q))
+  if (!validPricingInput(q))
     throw new Error("請完整填寫商品資料，金額與尺寸需為有效數值。");
   if (
     fees &&

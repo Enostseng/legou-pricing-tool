@@ -42,7 +42,7 @@ export function QuoteForm({ form, setField }: Props) {
         <input
           autoComplete="off"
           maxLength={200}
-          placeholder="例如：陶瓷手沖咖啡杯"
+          placeholder="試算可留空，記錄前請填品名"
           value={form.name}
           onChange={(e) => setField("name", e.target.value)}
         />
@@ -63,7 +63,7 @@ export function QuoteForm({ form, setField }: Props) {
           試算表補充欄位 <span>選填</span>
         </summary>
         <p className="help">
-          成本預設為廠商報價；實際售價預設為樂購採購價；市價毛利預設為樂購毛利率。稅後進價、check
+          成本預設為廠商報價；實際售價預設為蝦皮直營採購價；市價毛利預設為蝦皮直營毛利率。稅後進價、check
           Fixed 未定義公式，先留空供手動填寫。
         </p>
         <div className="two-columns">
