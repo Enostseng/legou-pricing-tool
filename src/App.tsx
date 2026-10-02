@@ -5,7 +5,7 @@ import type { FormState } from "./form";
 import { PlatformFees } from "./components/PlatformFees";
 import { CalculationSummary } from "./components/CalculationSummary";
 import { ProductHistory } from "./components/ProductHistory";
-import { calculateQuote, validInput } from "./pricing";
+import { calculateQuote, validInput, RATES } from "./pricing";
 import type { QuoteInput } from "./pricing";
 import { resolveFees } from "./feeTable";
 import type { Fees } from "./feeTable";
@@ -57,7 +57,11 @@ export default function App() {
             tableVersion: "manual",
           }
         : null
-      : resolveFees(input.length * input.width * input.height);
+      : resolveFees(
+          input.length * input.width * input.height,
+          Math.floor(input.retailPrice * RATES.purchase),
+          form.shippingChannel,
+        );
   const result = valid ? calculateQuote(input, fees) : null;
   const setField = (key: keyof FormState, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -162,6 +166,7 @@ export default function App() {
       height: String(p.input.height),
       vendorPrice: String(p.input.vendorPrice),
       targetMargin: String(p.input.targetMargin * 100),
+      shippingChannel: p.fees?.channel ?? "standard",
       feeMode: p.fees?.source === "manual" ? "manual" : "table",
       handling: p.fees === null ? "" : String(p.fees.handling),
       logistics: p.fees === null ? "" : String(p.fees.logistics),

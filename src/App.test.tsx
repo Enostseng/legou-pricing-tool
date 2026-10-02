@@ -16,12 +16,18 @@ function fill() {
       target: { value },
     });
 }
-it("records a pending quote without invented fees, clears product input, and retains the target", () => {
+it("records automatic table fees, clears product input, and retains the target", () => {
   render(<App />);
   fill();
   fireEvent.click(screen.getByRole("button", { name: "記錄商品並清空" }));
   expect(loadProducts()).toHaveLength(1);
-  expect(loadProducts()[0].result.status).toBe("pending");
+  expect(loadProducts()[0].fees).toMatchObject({
+    handling: 23.8,
+    logistics: 59.4,
+    productValue: 850,
+    channel: "standard",
+  });
+  expect(loadProducts()[0].result.status).toBe("fail");
   expect(loadProducts()[0].input.targetMargin).toBe(0.2);
   expect(screen.getByLabelText("商品名稱")).toHaveValue("");
   expect(screen.getByLabelText("目標淨利率")).toHaveValue(20);

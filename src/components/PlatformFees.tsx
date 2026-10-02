@@ -1,5 +1,5 @@
 import type { Fees } from "../feeTable";
-import { feeTable } from "../feeTable";
+import { feeTable, CHANNEL_LABELS } from "../feeTable";
 import { money } from "../pricing";
 import type { QuoteResult } from "../pricing";
 import type { FormState } from "../form";
@@ -26,7 +26,7 @@ export function PlatformFees({
       <div className="notice">
         {feeTable.status === "placeholder"
           ? "正式費率待提供。可先手動填入費用試算，結果會標註為手動費率。"
-          : "依靜態費率表計算；若未匹配級距，請確認費率設定。"}
+          : "依材積與樂購採購價查表。優惠僅限指定運送渠道：採購價 ≤ 25 元按 50%，26–50 元按 75% 計費。"}
       </div>
       <label className="field">
         <span>費率來源</span>
@@ -40,6 +40,34 @@ export function PlatformFees({
           <option value="manual">手動輸入／試算</option>
         </select>
       </label>
+      {form.feeMode === "table" && (
+        <>
+          <label className="field">
+            <span>運送渠道</span>
+            <select
+              value={form.shippingChannel}
+              onChange={(e) => setField("shippingChannel", e.target.value)}
+            >
+              {Object.entries(CHANNEL_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="help">
+            查價金額：樂購採購價 $ {money(result?.purchasePrice ?? null)} ·
+            費率版本 {feeTable.version}
+          </p>
+          {fees && (
+            <p className="help">
+              {fees.discountMultiplier === 1
+                ? "使用原費率"
+                : `寄倉與物流費均已按 ${Number(fees.discountMultiplier) * 100}% 計算`}
+            </p>
+          )}
+        </>
+      )}
       {form.feeMode === "manual" ? (
         <div className="two-columns">
           {(["handling", "logistics"] as const).map((key, i) => (
@@ -66,11 +94,11 @@ export function PlatformFees({
         <dl>
           <div>
             <dt>寄倉處理費</dt>
-            <dd>{fees ? `$ ${money(fees.handling)}` : "待提供費率"}</dd>
+            <dd>{fees ? `$ ${money(fees.handling)}` : "待填完整商品資料"}</dd>
           </div>
           <div>
             <dt>物流運送費</dt>
-            <dd>{fees ? `$ ${money(fees.logistics)}` : "待提供費率"}</dd>
+            <dd>{fees ? `$ ${money(fees.logistics)}` : "待填完整商品資料"}</dd>
           </div>
         </dl>
       )}

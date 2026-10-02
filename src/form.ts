@@ -1,3 +1,4 @@
+import type { ShippingChannel } from "./feeTable";
 import { DEFAULT_TARGET_MARGIN } from "./pricing";
 export interface FormState {
   name: string;
@@ -10,6 +11,7 @@ export interface FormState {
   handling: string;
   logistics: string;
   feeMode: "table" | "manual";
+  shippingChannel: ShippingChannel;
   cost: string;
   taxInclusiveCost: string;
   checkFixed: string;
@@ -29,6 +31,7 @@ export const emptyForm = (
   handling: "",
   logistics: "",
   feeMode: "table",
+  shippingChannel: "standard",
   cost: "",
   taxInclusiveCost: "",
   checkFixed: "",

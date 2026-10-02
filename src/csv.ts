@@ -1,4 +1,5 @@
 import type { ProductRecord } from "./storage";
+import { CHANNEL_LABELS } from "./feeTable";
 import { percent, statusLabel } from "./pricing";
 export const SHEET_HEADERS = [
   "品名",
@@ -44,6 +45,9 @@ export function exportCsv(
           "強哥淨利率",
           "報價結果",
           "建立時間",
+          "運送渠道",
+          "查價金額",
+          "費率倍率",
         ];
   const rows = products.map((p) => {
     const base = [
@@ -75,6 +79,9 @@ export function exportCsv(
             : percent(p.result.profitMargin),
           statusLabel(p.result, p.input.targetMargin),
           p.createdAt,
+          p.fees?.channel ? CHANNEL_LABELS[p.fees.channel] : "",
+          p.fees?.productValue ?? null,
+          p.fees?.discountMultiplier ?? null,
         ];
   });
   return (

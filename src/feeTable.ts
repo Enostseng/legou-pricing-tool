@@ -1,47 +1,86 @@
-/** 待公司提供正式費率。空陣列代表未知，不代表免費。
- * 級距以材積 cm³ 表示，minVolume 含下界、maxVolume 不含上界；null 表示無上限。
- * 若正式費率還依賴重量、尺寸或品類，請先擴充輸入與 resolver，不要硬套材積規則。
- */
-export interface FeeBand {
+import rates from "./data/fee-rates.json";
+
+export type ShippingChannel = "standard" | "discounted";
+export const CHANNEL_LABELS: Record<ShippingChannel, string> = {
+  standard: "一般渠道（原費率）",
+  discounted: "優惠渠道（無外箱環境友善／宅配隔日到貨）",
+};
+export interface FeeRow {
   minVolume: number;
-  maxVolume: number | null;
-  handling: number;
-  logistics: number;
+  minExclusive?: boolean;
+  handling: number[];
+  logistics: number[];
 }
 export interface FeeTable {
   version: string;
-  status: "placeholder" | "active";
-  bands: FeeBand[];
+  status: "active" | "placeholder";
+  priceMinimums: number[];
+  rows: FeeRow[];
 }
 export interface Fees {
   handling: number;
   logistics: number;
   source: "manual" | "table";
   tableVersion: string;
+  // Optional to preserve compatibility with already saved manual/pending records.
+  channel?: ShippingChannel;
+  productValue?: number;
+  discountMultiplier?: number;
 }
+/** Source: 費率.xlsx, 寄倉處理費 D4:S55 / 物流運送費 F4:U55.
+ * Product value is G=floor(retailPrice*0.85), confirmed by the user.
+ * Thresholds follow the sheet's approximate lookup, except >50000 is exclusive
+ * as explicitly confirmed by the user. No extra rounding or tax is added.
+ * Since 2026-01-01, ONLY eligible shipping channels receive the low-value discount.
+ * Matrices are BASE fees; apply the multiplier exactly once to each fee.
+ */
 export const feeTable: FeeTable = {
-  version: "pending",
-  status: "placeholder",
-  bands: [],
+  version: "2026-07-24-v1.0-r1",
+  status: "active",
+  ...rates,
 };
 export function resolveFees(
   volume: number,
+  productValue: number,
+  channel: ShippingChannel = "standard",
   table: FeeTable = feeTable,
 ): Fees | null {
-  if (!Number.isFinite(volume) || volume <= 0 || table.status !== "active")
+  if (
+    !Number.isFinite(volume) ||
+    volume <= 0 ||
+    !Number.isSafeInteger(productValue) ||
+    productValue < 0 ||
+    !["standard", "discounted"].includes(channel) ||
+    table.status !== "active"
+  )
     return null;
-  const matches = table.bands.filter(
-    (b) =>
-      volume >= b.minVolume && (b.maxVolume === null || volume < b.maxVolume),
+  const row = table.rows.findLast((r) =>
+    r.minExclusive ? volume > r.minVolume : volume >= r.minVolume,
   );
-  if (matches.length !== 1) return null;
-  const b = matches[0];
-  if (![b.handling, b.logistics].every((n) => Number.isFinite(n) && n >= 0))
+  const column = table.priceMinimums.findLastIndex((p) => productValue >= p);
+  if (!row || column < 0) return null;
+  const handling = row.handling[column],
+    logistics = row.logistics[column];
+  if (![handling, logistics].every((n) => Number.isFinite(n) && n >= 0))
     return null;
+  const discountMultiplier =
+    channel === "discounted"
+      ? productValue <= 25
+        ? 0.5
+        : productValue <= 50
+          ? 0.75
+          : 1
+      : 1;
+  // Remove binary floating-point noise only (e.g. 5.8*.75), not cents rounding.
+  const apply = (value: number) =>
+    Number((value * discountMultiplier).toFixed(6));
   return {
-    handling: b.handling,
-    logistics: b.logistics,
+    handling: apply(handling),
+    logistics: apply(logistics),
     source: "table",
     tableVersion: table.version,
+    channel,
+    productValue,
+    discountMultiplier,
   };
 }

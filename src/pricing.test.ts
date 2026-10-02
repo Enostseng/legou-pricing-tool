@@ -68,7 +68,7 @@ describe("pricing", () => {
     expect(r.maxVendorCost).toBeNull();
     expect(r.profitMargin).toBeNull();
     expect(r.status).toBe("pending");
-    expect(resolveFees(6000)).toBeNull();
+    expect(resolveFees(6000, NaN)).toBeNull();
   });
   it("rejects zero or negative payout as non-submittable", () => {
     const r = calculateQuote(input, { ...fees, handling: 1000 });
@@ -90,21 +90,5 @@ describe("pricing", () => {
     expect(
       calculateQuote({ ...input, vendorPrice: 900 }, fees).businessTax,
     ).toBe(-2.5);
-  });
-  it("matches volume boundaries and rejects overlapping or absent bands", () => {
-    const table = {
-      version: "test",
-      status: "active" as const,
-      bands: [
-        { minVolume: 0, maxVolume: 100, handling: 1, logistics: 2 },
-        { minVolume: 100, maxVolume: null, handling: 3, logistics: 4 },
-      ],
-    };
-    expect(resolveFees(99, table)?.handling).toBe(1);
-    expect(resolveFees(100, table)?.handling).toBe(3);
-    expect(resolveFees(100, { ...table, bands: [table.bands[0]] })).toBeNull();
-    expect(
-      resolveFees(99, { ...table, bands: [table.bands[0], table.bands[0]] }),
-    ).toBeNull();
   });
 });

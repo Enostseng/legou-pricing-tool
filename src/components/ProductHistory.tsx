@@ -1,3 +1,4 @@
+import { CHANNEL_LABELS } from "../feeTable";
 import { useState } from "react";
 import type { ProductRecord } from "../storage";
 import { money, percent, statusLabel } from "../pricing";
@@ -136,6 +137,14 @@ export function ProductHistory({ products, onEdit, onDelete, onClear }: Props) {
                     實際售價: money(p.sheet.actualPrice),
                     寄倉處理費: money(p.fees?.handling ?? null),
                     物流運送費: money(p.fees?.logistics ?? null),
+                    運送渠道: p.fees?.channel
+                      ? CHANNEL_LABELS[p.fees.channel]
+                      : "—",
+                    查價金額: money(p.fees?.productValue ?? null),
+                    費率倍率:
+                      p.fees?.discountMultiplier === undefined
+                        ? "—"
+                        : percent(p.fees.discountMultiplier),
                     費率來源:
                       p.fees?.source === "manual"
                         ? "手動試算"

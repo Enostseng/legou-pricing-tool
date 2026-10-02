@@ -16,7 +16,7 @@ test("quote, custom target, persistence, edit, search, CSV and confirmed deletio
   };
   for (const [label, value] of Object.entries(values))
     await page.getByLabel(label, { exact: true }).fill(value);
-  await expect(page.locator(".quote-status")).toHaveText("待提供費率");
+  await expect(page.locator(".quote-status")).toHaveText("可提交");
   await page.getByLabel("費率來源").selectOption("manual");
   await page.getByLabel("寄倉處理費", { exact: true }).fill("20");
   await page.getByLabel("物流運送費", { exact: true }).fill("30");
@@ -65,7 +65,7 @@ test("quote, custom target, persistence, edit, search, CSV and confirmed deletio
     page.getByRole("heading", { name: "從第一筆報價開始" }),
   ).toBeVisible();
 });
-test("pending records require explicit confirmation before clearing all", async ({
+test("table records require explicit confirmation before clearing all", async ({
   page,
 }) => {
   await page.goto("/");
@@ -117,4 +117,44 @@ test("fits viewport and can reload the PWA offline", async ({
     page.getByRole("heading", { name: "商品資料", exact: true }),
   ).toBeVisible();
   await context.setOffline(false);
+});
+
+test("automatic fees use purchase price, preserve discount precision, and restore channel on edit", async ({
+  page,
+}) => {
+  await page.goto("/");
+  for (const [label, value] of Object.entries({
+    商品名稱: "費率驗證商品",
+    商品市售價: "31",
+    長: "10",
+    寬: "10",
+    高: "1",
+    廠商實際報價: "10",
+  }))
+    await page.getByLabel(label, { exact: true }).fill(value);
+  const platform = page.locator(".platform-card");
+  await expect(platform).toContainText("查價金額：樂購採購價 $ 26.00");
+  await expect(platform).toContainText("$ 5.80");
+  await expect(platform).toContainText("$ 3.70");
+  await page.getByLabel("運送渠道").selectOption("discounted");
+  await expect(platform).toContainText("$ 4.35");
+  await expect(platform).toContainText("$ 2.78");
+  await page.getByRole("button", { name: "記錄商品並清空" }).click();
+  const data = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("legou.products.v1")!),
+  );
+  expect(data.products[0].fees.logistics).toBe(2.775);
+  expect(data.products[0].fees.productValue).toBe(26);
+  await page.reload();
+  await page.getByRole("button", { name: /商品清單/ }).click();
+  await page.getByRole("button", { name: "編輯", exact: true }).click();
+  await expect(page.getByLabel("運送渠道")).toHaveValue("discounted");
+  await expect(platform).toContainText("$ 4.35");
+  await page.getByLabel("商品市售價").fill("1000");
+  await page.getByLabel("長", { exact: true }).fill("50");
+  await page.getByLabel("寬", { exact: true }).fill("50");
+  await page.getByLabel("高", { exact: true }).fill("20");
+  await expect(platform).toContainText("$ 60.10");
+  await page.getByLabel("高", { exact: true }).fill("20.0001");
+  await expect(platform).toContainText("$ 94.10");
 });

@@ -33,7 +33,14 @@ export function isProductRecord(value: unknown): value is ProductRecord {
       validInput(p.input) &&
       (p.fees === null ||
         (["manual", "table"].includes(p.fees.source) &&
-          typeof p.fees.tableVersion === "string")) &&
+          typeof p.fees.tableVersion === "string" &&
+          (p.fees.channel === undefined ||
+            ["standard", "discounted"].includes(p.fees.channel)) &&
+          (p.fees.productValue === undefined ||
+            (Number.isSafeInteger(p.fees.productValue) &&
+              p.fees.productValue >= 0)) &&
+          (p.fees.discountMultiplier === undefined ||
+            [0.5, 0.75, 1].includes(p.fees.discountMultiplier)))) &&
       JSON.stringify(calculateQuote(p.input, p.fees)) ===
         JSON.stringify(p.result) &&
       finite(p.sheet.cost) &&
